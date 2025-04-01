@@ -1,70 +1,49 @@
-import pystyle
-import requests
+import os
+import git
+import time
+import itertools
 
-GITHUB_REPOS = [
-    "https://raw.githubusercontent.com/user/repo/main/data.json",  # Замените на реальные ссылки
-    "https://raw.githubusercontent.com/user/repo/main/another_data.json"
-]
+def animate_text(text):
+    for frame in itertools.cycle(['-', '\', '|', '/']):
+        print(f"\r{text} {frame}", end="", flush=True)
+        time.sleep(0.1)
 
-def search_github_files(query):
-    pystyle.Write.Print('''
-    MINI DOXX TOOLKIT
-    by p1p3tka:
-    ______________________________
-    |    Пробивает по:           |
-    |  [+] Instagram username    |
-    |  [+] Telegram username/id  |
-    |  [+] Twitter username      |
-    |  [+] Facebook              |
-    |  [+] Номер телефона        |
-    |  [+] Email                 |
-    |  [+] VK                    |
-    |  [+] и многое другое...    |
-    |____________________________|
-    ''', pystyle.Colors.blue_to_white, interval=0.0001)
+def clone_or_update_repo(repo_url, local_path):
+    if os.path.exists(local_path):
+        print("Обновляем репозиторий...")
+        repo = git.Repo(local_path)
+        repo.remotes.origin.pull()
+    else:
+        print("Клонируем репозиторий...")
+        repo = git.Repo.clone_from(repo_url, local_path)
+        print("Клонирование завершено!")
 
-    found = False
-    for url in GITHUB_REPOS:
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.text
-                if query.lower() in data.lower():
-                    found = True
-                    pystyle.Write.Print(f"\n[+] Найдено в файле: {url}", pystyle.Colors.green, interval=0.0001)
-            else:
-                pystyle.Write.Print(f"\n[!] Ошибка запроса: {response.status_code}", pystyle.Colors.red, interval=0.0001)
-        except Exception as e:
-            pystyle.Write.Print(f"\n[!] Ошибка: {e}", pystyle.Colors.red, interval=0.0001)
-    
-    if not found:
-        pystyle.Write.Print("\n[!] Ничего не найдено\n", pystyle.Colors.blue_to_white, interval=0.0001)
-
-def menu():
-    pystyle.Write.Print('''
-    MINI DOXX TOOLKIT
-    by p1p3tka:
-    ______________________________
-    |    Пробивает по:           |
-    |  [+] Instagram username    |
-    |  [+] Telegram username/id  |
-    |  [+] Twitter username      |
-    |  [+] Facebook              |
-    |  [+] Номер телефона        |
-    |  [+] Email                 |
-    |  [+] VK                    |
-    |  [+] и многое другое...    |
-    |____________________________|
-    ''', pystyle.Colors.blue_to_white, interval=0.0001)
+def search_in_txt_files(directory, search_term):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".txt"):
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                        for line_num, line in enumerate(f, 1):
+                            if search_term in line:
+                                print(f"Найдено в {file_path} (строка {line_num}): {line.strip()}")
+                except Exception as e:
+                    print(f"Ошибка при чтении {file_path}: {e}")
 
 if __name__ == "__main__":
+    repo_url = input("Введите URL репозитория: ")
+    local_repo_path = "repo_clone"
+    
+    print("Запуск программы...")
+    animate_text("Подготовка...")
+    time.sleep(2)
+    
+    clone_or_update_repo(repo_url, local_repo_path)
+    
     while True:
-        try:
-            pystyle.System.Clear()
-            query = pystyle.Write.Input("\n[+] Введите запрос для поиска в GitHub: ", pystyle.Colors.blue_to_white, interval=0.0001)
-            if query:
-                search_github_files(query)
-                pystyle.Write.Input("\n[+] Нажмите Enter для продолжения...", pystyle.Colors.blue_to_white, interval=0.0001)
-        except KeyboardInterrupt:
-            pystyle.Write.Print("\n[-] Выход...", pystyle.Colors.red, interval=0.0001)
-            exit()
+        search_term = input("\nВведите слово для поиска (или 'exit' для выхода): ")
+        if search_term.lower() == 'exit':
+            print("Выход из программы...")
+            break
+        search_in_txt_files(local_repo_path, search_term)
