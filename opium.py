@@ -58,7 +58,9 @@ def search_in_txt_files(directory, search_term):
     else:
         print("\033[1;31mНичего не найдено.\033[0m")
 
-def execute_python_script(/armen78782/DB):
+script_path = "/data/data/com.termux/files/home/repository-name/scripts/script.py"
+
+def execute_python_script(script_path):
     try:
         print(f"\033[1;36mЗапуск скрипта: {script_path}\033[0m")
         subprocess.run(["python3", script_path], check=True)
