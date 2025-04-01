@@ -3,6 +3,7 @@ import git
 import time
 import itertools
 import threading
+import subprocess  # Импортируем subprocess для выполнения внешних скриптов
 
 def animate_text(text, event):
     for frame in itertools.cycle(['⠇', '⠋', '⠙', '⠸', '⠴', '⠦']):
@@ -57,11 +58,21 @@ def search_in_txt_files(directory, search_term):
     else:
         print("\033[1;31mНичего не найдено.\033[0m")
 
+def execute_python_script(DB/DDOSSWIFI/):
+    try:
+        print(f"\033[1;36mЗапуск скрипта: {script_path}\033[0m")
+        subprocess.run(["python3", script_path], check=True)
+        print("\033[1;32mСкрипт выполнен успешно!\033[0m")
+    except subprocess.CalledProcessError as e:
+        print(f"\033[1;31mОшибка при выполнении скрипта: {e}\033[0m")
+    except FileNotFoundError:
+        print(f"\033[1;31mФайл не найден: {script_path}\033[0m")
+
 def main_menu():
     print("\033[1;35mВыберите действие:\033[0m")
     print("1. Поиск SBERBANK")
     print("2. Поиск По Базе Данных")
-    print("3. Поиск в папке 3")
+    print("3. Выполнить Python скрипт из другой папки")
     print("4. Выход")
     
     choice = input("\033[1;36mВведите номер действия: \033[0m")
@@ -86,8 +97,8 @@ if __name__ == "__main__":
             search_term = input("\n\033[1;36mВведите слово для поиска в папке 2: \033[0m")
             search_in_txt_files(os.path.join(local_repo_path, "probiv"), search_term)
         elif choice == '3':
-            search_term = input("\n\033[1;36mВведите слово для поиска в папке 3: \033[0m")
-            search_in_txt_files(os.path.join(local_repo_path, "folder3"), search_term)
+            script_name = input("\n\033[1;36mВведите путь к Python скрипту для выполнения (например, /path/to/other_script.py): \033[0m")
+            execute_python_script(script_name)  # Выполнение скрипта
         elif choice == '4':
             print("\033[1;31mВыход из программы...\033[0m")
             break
