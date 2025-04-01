@@ -7,6 +7,22 @@ GITHUB_REPOS = [
 ]
 
 def search_github_files(query):
+    pystyle.Write.Print('''
+    MINI DOXX TOOLKIT
+    by p1p3tka:
+    ______________________________
+    |    Пробивает по:           |
+    |  [+] Instagram username    |
+    |  [+] Telegram username/id  |
+    |  [+] Twitter username      |
+    |  [+] Facebook              |
+    |  [+] Номер телефона        |
+    |  [+] Email                 |
+    |  [+] VK                    |
+    |  [+] и многое другое...    |
+    |____________________________|
+    ''', pystyle.Colors.blue_to_white, interval=0.0001)
+
     found = False
     for url in GITHUB_REPOS:
         try:
