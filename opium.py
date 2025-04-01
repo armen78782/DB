@@ -6,22 +6,23 @@ GITHUB_REPOS = [
     "https://raw.githubusercontent.com/user/repo/main/another_data.json"
 ]
 
-def getLeakOsinit(query):
-    found = False
-    for url in GITHUB_REPOS:
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                for entry in data:
-                    if query.lower() in str(entry).lower():
-                        pystyle.Write.Print(f"\n[+] Найдено: {entry}\n", pystyle.Colors.green_to_white, interval=0.0001)
-                        found = True
+def search_github_files(query):
+    try:
+        response = requests.get(github_api_url)
+        if response.status_code == 200:
+            files = response.json()
+            results = [file['name'] for file in files if query.lower() in file['name'].lower()]
+            if results:
+                pystyle.Write.Print("\n[+] Найденные файлы:", pystyle.Colors.green, interval=0.0001)
+                for file in results:
+                    pystyle.Write.Print(f" - {file}", pystyle.Colors.green, interval=0.0001)
             else:
-                pystyle.Write.Print(f"[!] Ошибка загрузки данных из {url}\n", pystyle.Colors.red, interval=0.0001)
-        except Exception as e:
-            pystyle.Write.Print(f"[!] Ошибка: {e}\n", pystyle.Colors.red, interval=0.0001)
-    
+                pystyle.Write.Print("\n[-] Файлы не найдены", pystyle.Colors.red, interval=0.0001)
+        else:
+            pystyle.Write.Print(f"\n[!] Ошибка запроса: {response.status_code}", pystyle.Colors.red, interval=0.0001)
+    except Exception as e:
+        pystyle.Write.Print(f"\n[!] Ошибка: {e}", pystyle.Colors.red, interval=0.0001)
+
     if not found:
         pystyle.Write.Print("\n[!] Ничего не найдено\n", pystyle.Colors.blue_to_white, interval=0.0001)
 
