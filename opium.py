@@ -5,7 +5,7 @@ import itertools
 import threading
 
 def animate_text(text, event):
-    for frame in itertools.cycle(['-', '\', '|', '/']):
+    for frame in itertools.cycle(['-', '\\', '|', '/']):
         if event.is_set():
             break
         print(f"\r{text} {frame}", end="", flush=True)
