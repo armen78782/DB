@@ -4,7 +4,7 @@ import time
 import itertools
 
 def animate_text(text):
-    for frame in itertools.cycle(['-', '\', '|', '/']):
+    for frame in itertools.cycle(['-', '\\', '|', '/']):
         print(f"\r{text} {frame}", end="", flush=True)
         time.sleep(0.1)
 
