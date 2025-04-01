@@ -59,7 +59,7 @@ def search_in_txt_files(directory, search_term):
 
 def main_menu():
     print("\033[1;35mВыберите действие:\033[0m")
-    print("1. Поиск в папке 1")
+    print("1. Поиск SBERBANK")
     print("2. Поиск в папке 2")
     print("3. Поиск в папке 3")
     print("4. Выход")
