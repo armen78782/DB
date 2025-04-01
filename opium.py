@@ -44,16 +44,12 @@ def menu():
 
 if __name__ == "__main__":
     while True:
-        try:
-            pystyle.System.Clear()
-            menu()
-            queries = pystyle.Write.Input('''\n[+] Введите запрос(; для нескольких данных): ''', pystyle.Colors.blue_to_white, interval=0.0001)
-            if queries:
-                getLeakOsinit(queries)
-                pystyle.Write.Input('\n[+] Нажмите Enter для продолжения...', pystyle.Colors.blue_to_white, interval=0.0001)
-        except Exception as e:
-            pystyle.Write.Print(f'[!] Ошибка: {e}', pystyle.Colors.red, interval=0.0001)
-            pystyle.Write.Input('\n[+] Нажмите Enter для продолжения...', pystyle.Colors.blue_to_white, interval=0.0001)
-        except KeyboardInterrupt:
-            pystyle.Write.Print('[-] Выход...', pystyle.Colors.red, interval=0.0001)
-            exit()
+    try:
+        pystyle.System.Clear()
+        query = pystyle.Write.Input("\n[+] Введите запрос для поиска в GitHub: ", pystyle.Colors.blue_to_white, interval=0.0001)
+        if query:
+            search_github_files(query)
+            pystyle.Write.Input("\n[+] Нажмите Enter для продолжения...", pystyle.Colors.blue_to_white, interval=0.0001)
+    except KeyboardInterrupt:
+        pystyle.Write.Print("\n[-] Выход...", pystyle.Colors.red, interval=0.0001)
+        exit()
