@@ -84,7 +84,7 @@ if __name__ == "__main__":
             search_in_txt_files(os.path.join(local_repo_path, "sberbank"), search_term)
         elif choice == '2':
             search_term = input("\n\033[1;36mВведите слово для поиска в папке 2: \033[0m")
-            search_in_txt_files(os.path.join(local_repo_path, "folder2"), search_term)
+            search_in_txt_files(os.path.join(local_repo_path, "probiv"), search_term)
         elif choice == '3':
             search_term = input("\n\033[1;36mВведите слово для поиска в папке 3: \033[0m")
             search_in_txt_files(os.path.join(local_repo_path, "folder3"), search_term)
