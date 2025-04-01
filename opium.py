@@ -5,12 +5,12 @@ import itertools
 import threading
 
 def animate_text(text, event):
-    for frame in itertools.cycle(['-', '\\', '|', '/']):
+    for frame in itertools.cycle(['⠇', '⠋', '⠙', '⠸', '⠴', '⠦']):
         if event.is_set():
             break
-        print(f"\r{text} {frame}", end="", flush=True)
+        print(f"\r\033[1;34m{text} {frame}\033[0m", end="", flush=True)
         time.sleep(0.1)
-    print(f"\r{text}... Готово!")
+    print(f"\r\033[1;32m{text}... Готово!\033[0m")
 
 def clone_or_update_repo(repo_url, local_path):
     event = threading.Event()
@@ -24,7 +24,7 @@ def clone_or_update_repo(repo_url, local_path):
         else:
             git.Repo.clone_from(repo_url, local_path)
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"\n\033[1;31mОшибка: {e}\033[0m")
     
     event.set()
     anim_thread.join()
@@ -43,32 +43,32 @@ def search_in_txt_files(directory, search_term):
                     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                         for line_num, line in enumerate(f, 1):
                             if search_term in line:
-                                results.append(f"Найдено в {file_path} (строка {line_num}): {line.strip()}")
+                                results.append(f"\033[1;33mНайдено в {file_path} (строка {line_num}):\033[0m {line.strip()}")
                 except Exception as e:
-                    print(f"Ошибка при чтении {file_path}: {e}")
+                    print(f"\n\033[1;31mОшибка при чтении {file_path}: {e}\033[0m")
     
     event.set()
     anim_thread.join()
     
-    print("\nРезультаты поиска:")
+    print("\n\033[1;36mРезультаты поиска:\033[0m")
     if results:
         for res in results:
             print(res)
     else:
-        print("Ничего не найдено.")
+        print("\033[1;31mНичего не найдено.\033[0m")
 
 if __name__ == "__main__":
-    repo_url = input("Введите URL репозитория: ")
-    local_repo_path = "repo_clone"
-    
-    print("Запуск программы...")
+    print("\033[1;35mЗапуск программы...\033[0m")
     time.sleep(1)
+    
+    repo_url = input("\033[1;36mВведите URL репозитория: \033[0m")
+    local_repo_path = "repo_clone"
     
     clone_or_update_repo(repo_url, local_repo_path)
     
     while True:
-        search_term = input("\nВведите слово для поиска (или 'exit' для выхода): ")
+        search_term = input("\n\033[1;36mВведите слово для поиска (или 'exit' для выхода): \033[0m")
         if search_term.lower() == 'exit':
-            print("Выход из программы...")
+            print("\033[1;31mВыход из программы...\033[0m")
             break
         search_in_txt_files(local_repo_path, search_term)
