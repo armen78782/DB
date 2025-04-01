@@ -4,7 +4,7 @@ import time
 import itertools
 
 def animate_text(text):
-    for frame in itertools.cycle(['-', '\\', '|', '/']):
+    for frame in itertools.cycle(['-', '\\', '|', '/']):  # Исправлен символ \
         print(f"\r{text} {frame}", end="", flush=True)
         time.sleep(0.1)
 
@@ -36,8 +36,7 @@ if __name__ == "__main__":
     local_repo_path = "repo_clone"
     
     print("Запуск программы...")
-    animate_text("Подготовка...")
-    time.sleep(2)
+    time.sleep(2)  # Убрана анимация, чтобы программа не зависала
     
     clone_or_update_repo(repo_url, local_repo_path)
     
