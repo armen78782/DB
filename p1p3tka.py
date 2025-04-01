@@ -4,13 +4,19 @@ import time
 import itertools
 import threading
 
-def animate_text(text, event):
+def animate_text(text, event, color_code="\033[1;34m"):
     for frame in itertools.cycle(['⠇', '⠋', '⠙', '⠸', '⠴', '⠦']):
         if event.is_set():
             break
-        print(f"\r\033[1;34m{text} {frame}\033[0m", end="", flush=True)
+        print(f"\r{color_code}{text} {frame}\033[0m", end="", flush=True)
         time.sleep(0.1)
-    print(f"\r\033[1;32m{text}... Готово!\033[0m")
+    print(f"\r{color_code}{text}... Готово!\033[0m")
+
+def animate_nick():
+    event = threading.Event()
+    nick_thread = threading.Thread(target=animate_text, args=("p1p3tkaa", event, "\033[1;36m"))
+    nick_thread.start()
+    nick_thread.join()
 
 def clone_or_update_repo(repo_url, local_path):
     event = threading.Event()
@@ -58,18 +64,28 @@ def search_in_txt_files(directory, search_term):
         print("\033[1;31mНичего не найдено.\033[0m")
 
 def main_menu():
-    print("\033[1;35mВыберите действие:\033[0m")
-    print("1. Поиск SBERBANK")
-    print("2. Поиск По Базе Данных")
-    print("3. Поиск в папке 3")
-    print("4. Выход")
+    print("\033[1;35m┌────────────────────────────────────────────────┐\033[0m")
+    print("\033[1;35m│                  Главное меню                 │\033[0m")
+    print("\033[1;35m├────────────────────────────────────────────────┤\033[0m")
+    print("\033[1;35m│ 1. Поиск по папке SBERBANK                    │\033[0m")
+    print("\033[1;35m│ 2. Поиск по базе данных                      │\033[0m")
+    print("\033[1;35m│ 3. Поиск в папке 3                           │\033[0m")
+    print("\033[1;35m│ 4. Выход                                     │\033[0m")
+    print("\033[1;35m└────────────────────────────────────────────────┘\033[0m")
     
     choice = input("\033[1;36mВведите номер действия: \033[0m")
     return choice
 
-if name == "main":
-    print("\033[1;35mЗапуск программы...\033[0m")
+def intro():
+    print("\033[1;34m┌────────────────────────────────┐\033[0m")
+    print("\033[1;34m│     Запуск программы...       │\033[0m")
+    print("\033[1;34m└────────────────────────────────┘\033[0m")
     time.sleep(1)
+    
+    animate_nick()
+
+if __name__ == "__main__":
+    intro()
     
     repo_url = input("\033[1;36mВведите URL репозитория: \033[0m")
     local_repo_path = "repo_clone"
@@ -80,10 +96,10 @@ if name == "main":
         choice = main_menu()
         
         if choice == '1':
-            search_term = input("\n\033[1;36mВведите слово для поиска в папке 1: \033[0m")
+            search_term = input("\n\033[1;36mВведите слово для поиска в папке SBERBANK: \033[0m")
             search_in_txt_files(os.path.join(local_repo_path, "sberbank"), search_term)
         elif choice == '2':
-            search_term = input("\n\033[1;36mВведите слово для поиска в папке 2: \033[0m")
+            search_term = input("\n\033[1;36mВведите слово для поиска в базе данных: \033[0m")
             search_in_txt_files(os.path.join(local_repo_path, "probiv"), search_term)
         elif choice == '3':
             search_term = input("\n\033[1;36mВведите слово для поиска в папке 3: \033[0m")
