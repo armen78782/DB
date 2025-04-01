@@ -58,7 +58,7 @@ def search_in_txt_files(directory, search_term):
     else:
         print("\033[1;31mНичего не найдено.\033[0m")
 
-def execute_python_script(https://github.com/armen78782/DB):
+def execute_python_script(/armen78782/DB):
     try:
         print(f"\033[1;36mЗапуск скрипта: {script_path}\033[0m")
         subprocess.run(["python3", script_path], check=True)
