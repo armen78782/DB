@@ -57,6 +57,16 @@ def search_in_txt_files(directory, search_term):
     else:
         print("\033[1;31mНичего не найдено.\033[0m")
 
+def main_menu():
+    print("\033[1;35mВыберите действие:\033[0m")
+    print("1. Поиск в папке 1")
+    print("2. Поиск в папке 2")
+    print("3. Поиск в папке 3")
+    print("4. Выход")
+    
+    choice = input("\033[1;36mВведите номер действия: \033[0m")
+    return choice
+
 if __name__ == "__main__":
     print("\033[1;35mЗапуск программы...\033[0m")
     time.sleep(1)
@@ -67,8 +77,19 @@ if __name__ == "__main__":
     clone_or_update_repo(repo_url, local_repo_path)
     
     while True:
-        search_term = input("\n\033[1;36mВведите слово для поиска (или 'exit' для выхода): \033[0m")
-        if search_term.lower() == 'exit':
+        choice = main_menu()
+        
+        if choice == '1':
+            search_term = input("\n\033[1;36mВведите слово для поиска в папке 1: \033[0m")
+            search_in_txt_files(os.path.join(local_repo_path, "sberbank"), search_term)
+        elif choice == '2':
+            search_term = input("\n\033[1;36mВведите слово для поиска в папке 2: \033[0m")
+            search_in_txt_files(os.path.join(local_repo_path, "folder2"), search_term)
+        elif choice == '3':
+            search_term = input("\n\033[1;36mВведите слово для поиска в папке 3: \033[0m")
+            search_in_txt_files(os.path.join(local_repo_path, "folder3"), search_term)
+        elif choice == '4':
             print("\033[1;31mВыход из программы...\033[0m")
             break
-        search_in_txt_files(local_repo_path, search_term)
+        else:
+            print("\033[1;31mНекорректный ввод. Попробуйте снова.\033[0m")
