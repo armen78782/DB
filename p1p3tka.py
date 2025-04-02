@@ -12,12 +12,6 @@ def animate_text(text, event, color_code="\033[1;34m"):
         time.sleep(0.1)
     print(f"\r{color_code}{text}... Готово!\033[0m")
 
-def animate_nick():
-    event = threading.Event()
-    nick_thread = threading.Thread(target=animate_text, args=("p1p3tkaa", event, "\033[1;36m"))
-    nick_thread.start()
-    nick_thread.join()
-
 def clone_or_update_repo(repo_url, local_path):
     event = threading.Event()
     anim_thread = threading.Thread(target=animate_text, args=("Обработка репозитория", event))
@@ -81,8 +75,6 @@ def intro():
     print("\033[1;34m│     Запуск программы...       │\033[0m")
     print("\033[1;34m└────────────────────────────────┘\033[0m")
     time.sleep(1)
-    
-    animate_nick()
 
 if __name__ == "__main__":
     intro()
