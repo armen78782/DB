@@ -115,7 +115,7 @@ if __name__ == "__main__":
                                                   ..
     """
     print(Fore.RED + banner + Style.RESET_ALL)
-    print(Fore.RED + "Сносер Vop_V2 Улучшил By:Dead Fantom Killer")
+    print(Fore.RED + "Сносер P1P3TKAAA By:P1P3TKA")
 
     text = input(Fore.RED +"Введите текст жалобы: "+ Style.RESET_ALL)
     count = int(input(Fore.RED +"Количество жалоб: "+ Style.RESET_ALL))
