@@ -120,6 +120,7 @@ if __name__ == "__main__":
                                                   .@-
                                                   ..
     """
+    timesleep(1) 
     
     repo_url = input("\033[1;36mВведите URL репозитория: \033[0m")
     local_repo_path = "repo_clone"
