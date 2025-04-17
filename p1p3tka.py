@@ -97,6 +97,7 @@ def scrape_telegram(name_query):
                 })
 
 
+
 def scrape_vk(name_query):
     query = f"site:vk.com {name_query}"
     url = f"https://duckduckgo.com/html/?q={query}"
