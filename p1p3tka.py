@@ -76,25 +76,26 @@ def scrape_github(username):
     DATA.append({"source": "GitHub", "name": name.text.strip() if name else username, "email": email.text.replace("mailto:", "") if email else "", "phone": "", "link": url})
 
 def scrape_telegram(name_query):
-    query = f"site:t.me {name_query}"
-    url = f"https://duckduckgo.com/html/?q={query}"
-    r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "html.parser")
-    results = soup.find_all("a", href=True)
-    for link in results:
-        href = link["href"]
-        if "uddg=" in href and "t.me" in href:
-            match = re.search(r'uddg=(.*)', href)
-            if match:
-                encoded_url = match.group(1)
-                decoded_url = urllib.parse.unquote(encoded_url)
-                DATA.append({
-                    "source": "Telegram",
-                    "name": name_query,
-                    "email": "",
-                    "phone": "",
-                    "link": decoded_url
-                })
+    query = f"site:t.me {name_query}"
+    url = f"https://duckduckgo.com/html/?q={query}"
+    r = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(r.text, "html.parser")
+    results = soup.find_all("a", href=True)
+    for link in results:
+        href = link["href"]
+        if "uddg=" in href and "t.me" in href:
+            match = re.search(r'uddg=(.*)', href)
+            if match:
+                encoded_url = match.group(1)
+                decoded_url = urllib.parse.unquote(encoded_url)
+                DATA.append({
+                    "source": "Telegram",
+                    "name": name_query,
+                    "email": "",
+                    "phone": "",
+                    "link": decoded_url
+                })
+
 
 def scrape_vk(name_query):
     query = f"site:vk.com {name_query}"
