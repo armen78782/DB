@@ -67,7 +67,7 @@ def search_in_txt_files(directory, search_term):
 def scrape_github(username):
     url = f"https://github.com/{username}"
     r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r.text, "html.parser")
     name = soup.find("span", class_="p-name")
     bio = soup.find("div", class_="p-note")
     email = soup.find("a", href=lambda x: x and "mailto:" in x)
@@ -77,7 +77,7 @@ def scrape_vk(name_query):
     query = f"site:vk.com {name_query}"
     url = f"https://duckduckgo.com/html/?q={query}"
     r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r.text, "html.parser")
     results = soup.find_all("a", href=True)
     for link in results:
         href = link["href"]
@@ -87,14 +87,14 @@ def scrape_vk(name_query):
 def scrape_avito(search_term):
     url = f"https://www.avito.ru/rossiya?q={search_term}"
     r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r.text, "html.parser")
     items = soup.find_all("a", href=True)
     for item in items:
         href = item["href"]
         if "/item/" in href:
             full_url = "https://www.avito.ru" + href
             ad = requests.get(full_url, headers=HEADERS)
-            ad_soup = BeautifulSoup(ad.text, "lxml")
+            ad_soup = BeautifulSoup(ad.text, "html.parser")
             text = ad_soup.get_text()
             phones = re.findall(r'\+?\d[\d\s\-\(\)]{8,}\d', text)
             title = ad_soup.find("span", {"itemprop": "name"})
