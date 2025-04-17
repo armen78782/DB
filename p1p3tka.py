@@ -7,6 +7,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
+import urllib.parse
+
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 DATA = []
@@ -73,6 +75,27 @@ def scrape_github(username):
     email = soup.find("a", href=lambda x: x and "mailto:" in x)
     DATA.append({"source": "GitHub", "name": name.text.strip() if name else username, "email": email.text.replace("mailto:", "") if email else "", "phone": "", "link": url})
 
+def scrape_telegram(name_query):
+    query = f"site:t.me {name_query}"
+    url = f"https://duckduckgo.com/html/?q={query}"
+    r = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(r.text, "html.parser")
+    results = soup.find_all("a", href=True)
+    for link in results:
+        href = link["href"]
+        if "uddg=" in href and "t.me" in href:
+            match = re.search(r'uddg=(.*)', href)
+            if match:
+                encoded_url = match.group(1)
+                decoded_url = urllib.parse.unquote(encoded_url)
+                DATA.append({
+                    "source": "Telegram",
+                    "name": name_query,
+                    "email": "",
+                    "phone": "",
+                    "link": decoded_url
+                })
+
 def scrape_vk(name_query):
     query = f"site:vk.com {name_query}"
     url = f"https://duckduckgo.com/html/?q={query}"
@@ -80,9 +103,20 @@ def scrape_vk(name_query):
     soup = BeautifulSoup(r.text, "html.parser")
     results = soup.find_all("a", href=True)
     for link in results:
-        href = link["href"]
-        if "vk.com" in href and "/public" not in href and "/club" not in href:
-            DATA.append({"source": "VK", "name": name_query, "email": "", "phone": "", "link": href})
+    href = link["href"]
+    if "uddg=" in href and "vk.com" in href and "/public" not in href and "/club" not in href:
+        match = re.search(r'uddg=(.*)', href)
+        if match:
+            encoded_url = match.group(1)
+            decoded_url = urllib.parse.unquote(encoded_url)
+            DATA.append({
+                "source": "VK",
+                "name": name_query,
+                "email": "",
+                "phone": "",
+                "link": decoded_url
+            })
+
 
 def scrape_avito(search_term):
     url = f"https://www.avito.ru/rossiya?q={search_term}"
@@ -118,6 +152,7 @@ def main_menu():
 def run_osint():
     query = input("\033[1;36mВведите имя или ключевое слово для OSINT-поиска: \033[0m")
     scrape_github(query)
+    scrape_telegram(query)
     scrape_vk(query)
     scrape_avito(query)
     df = pd.DataFrame(DATA)
