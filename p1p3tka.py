@@ -7,7 +7,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
-import urllib.parse
+from telethon.sync import TelegramClient
+from telethon.tl.functions.users import GetFullUser
+from telethon.errors import UsernameNotOccupiedError, FloodWaitError
+from telethon.tl.types import UserStatusOnline, UserStatusOffline
 
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
@@ -66,127 +69,27 @@ def search_in_txt_files(directory, search_term):
     else:
         print("\033[1;31mНичего не найдено.\033[0m")
 
-def scrape_github(username):
-    url = f"https://github.com/{username}"
-    r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "html.parser")
-    name = soup.find("span", class_="p-name")
-    bio = soup.find("div", class_="p-note")
-    email = soup.find("a", href=lambda x: x and "mailto:" in x)
-    DATA.append({"source": "GitHub", "name": name.text.strip() if name else username, "email": email.text.replace("mailto:", "") if email else "", "phone": "", "link": url})
 
 def scrape_telegram(name_query):
-    query = f"site:t.me {name_query}"
-    url = f"https://duckduckgo.com/html/?q={query}"
-    r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "html.parser")
-    results = soup.find_all("a", href=True)
-    for link in results:
-        href = link["href"]
-        if "uddg=" in href and "t.me" in href:
-            match = re.search(r'uddg=(.*)', href)
-            if match:
-                encoded_url = match.group(1)
-                decoded_url = urllib.parse.unquote(encoded_url)
-                DATA.append({
-                    "source": "Telegram",
-                    "name": name_query,
-                    "email": "",
-                    "phone": "",
-                    "link": decoded_url
-                })
-
-
-
-def scrape_vk(name_query):
-    query = f"site:vk.com {name_query}"
-    url = f"https://duckduckgo.com/html/?q={query}"
-    r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "html.parser")
-    results = soup.find_all("a", href=True)
-    for link in results:
-    href = link["href"]
-    if "uddg=" in href and "vk.com" in href and "/public" not in href and "/club" not in href:
-        match = re.search(r'uddg=(.*)', href)
-        if match:
-            encoded_url = match.group(1)
-            decoded_url = urllib.parse.unquote(encoded_url)
-            DATA.append({
-                "source": "VK",
-                "name": name_query,
-                "email": "",
-                "phone": "",
-                "link": decoded_url
-            })
-
-
-def scrape_avito(search_term):
-    url = f"https://www.avito.ru/rossiya?q={search_term}"
-    r = requests.get(url, headers=HEADERS)import os
-import git
-import time
-import itertools
-import threading
-import requests
-from bs4 import BeautifulSoup
-import re
-import pandas as pd
-
-HEADERS = {"User-Agent": "Mozilla/5.0"}
-DATA = []
-
-def animate_text(text, event, color_code="\033[1;34m"):
-    for frame in itertools.cycle(['⠇', '⠋', '⠙', '⠸', '⠴', '⠦']):
-        if event.is_set():
-            break
-        print(f"\r{color_code}{text} {frame}\033[0m", end="", flush=True)
-        time.sleep(0.1)
-    print(f"\r{color_code}{text}... Готово!\033[0m")
-
-def clone_or_update_repo(repo_url, local_path):
-    event = threading.Event()
-    anim_thread = threading.Thread(target=animate_text, args=("Обработка репозитория", event))
-    anim_thread.start()
-
-    try:
-        if os.path.exists(local_path):
-            repo = git.Repo(local_path)
-            repo.remotes.origin.pull()
-        else:
-            git.Repo.clone_from(repo_url, local_path)
-    except Exception as e:
-        print(f"\n\033[1;31mОшибка: {e}\033[0m")
-
-    event.set()
-    anim_thread.join()
-
-def search_in_txt_files(directory, search_term):
-    event = threading.Event()
-    anim_thread = threading.Thread(target=animate_text, args=("Поиск", event))
-    anim_thread.start()
-
-    results = []
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".txt"):
-                file_path = os.path.join(root, file)
-                try:
-                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                        for line_num, line in enumerate(f, 1):
-                            if search_term in line:
-                                results.append(f"\033[1;33mНайдено в {file_path} (строка {line_num}):\033[0m {line.strip()}")
-                except Exception as e:
-                    print(f"\n\033[1;31mОшибка при чтении {file_path}: {e}\033[0m")
-
-    event.set()
-    anim_thread.join()
-
-    print("\n\033[1;36mРезультаты поиска:\033[0m")
-    if results:
-        for res in results:
-            print(res)
-    else:
-        print("\033[1;31mНичего не найдено.\033[0m")
+    query = f"site:t.me {name_query}"
+    url = f"https://html.duckduckgo.com/html/?q={query}"
+    r = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(r.text, "html.parser")
+    results = soup.find_all("a", href=True)
+    for link in results:
+        href = link["href"]
+        if "uddg=" in href and "t.me/" in href:
+            match = re.search(r'uddg=(.*)', href)
+            if match:
+                encoded_url = match.group(1)
+                decoded_url = urllib.parse.unquote(encoded_url)
+                DATA.append({
+                    "source": "Telegram",
+                    "name": name_query,
+                    "email": "",
+                    "phone": "",
+                    "link": decoded_url
+                })
 
 def scrape_github(username):
     url = f"https://github.com/{username}"
@@ -244,6 +147,7 @@ def run_osint():
     scrape_github(query)
     scrape_vk(query)
     scrape_avito(query)
+    scrape_telegram(query) 
     df = pd.DataFrame(DATA)
     print("\n\033[1;36mНайдено:\033[0m")
     print(df)
