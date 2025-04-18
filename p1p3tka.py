@@ -122,15 +122,103 @@ def scrape_vk(name_query):
 
 def scrape_avito(search_term):
     url = f"https://www.avito.ru/rossiya?q={search_term}"
+    r = requests.get(url, headers=HEADERS)import os
+import git
+import time
+import itertools
+import threading
+import requests
+from bs4 import BeautifulSoup
+import re
+import pandas as pd
+
+HEADERS = {"User-Agent": "Mozilla/5.0"}
+DATA = []
+
+def animate_text(text, event, color_code="\033[1;34m"):
+    for frame in itertools.cycle(['⠇', '⠋', '⠙', '⠸', '⠴', '⠦']):
+        if event.is_set():
+            break
+        print(f"\r{color_code}{text} {frame}\033[0m", end="", flush=True)
+        time.sleep(0.1)
+    print(f"\r{color_code}{text}... Готово!\033[0m")
+
+def clone_or_update_repo(repo_url, local_path):
+    event = threading.Event()
+    anim_thread = threading.Thread(target=animate_text, args=("Обработка репозитория", event))
+    anim_thread.start()
+
+    try:
+        if os.path.exists(local_path):
+            repo = git.Repo(local_path)
+            repo.remotes.origin.pull()
+        else:
+            git.Repo.clone_from(repo_url, local_path)
+    except Exception as e:
+        print(f"\n\033[1;31mОшибка: {e}\033[0m")
+
+    event.set()
+    anim_thread.join()
+
+def search_in_txt_files(directory, search_term):
+    event = threading.Event()
+    anim_thread = threading.Thread(target=animate_text, args=("Поиск", event))
+    anim_thread.start()
+
+    results = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".txt"):
+                file_path = os.path.join(root, file)
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                        for line_num, line in enumerate(f, 1):
+                            if search_term in line:
+                                results.append(f"\033[1;33mНайдено в {file_path} (строка {line_num}):\033[0m {line.strip()}")
+                except Exception as e:
+                    print(f"\n\033[1;31mОшибка при чтении {file_path}: {e}\033[0m")
+
+    event.set()
+    anim_thread.join()
+
+    print("\n\033[1;36mРезультаты поиска:\033[0m")
+    if results:
+        for res in results:
+            print(res)
+    else:
+        print("\033[1;31mНичего не найдено.\033[0m")
+
+def scrape_github(username):
+    url = f"https://github.com/{username}"
     r = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = BeautifulSoup(r.text, "lxml")
+    name = soup.find("span", class_="p-name")
+    bio = soup.find("div", class_="p-note")
+    email = soup.find("a", href=lambda x: x and "mailto:" in x)
+    DATA.append({"source": "GitHub", "name": name.text.strip() if name else username, "email": email.text.replace("mailto:", "") if email else "", "phone": "", "link": url})
+
+def scrape_vk(name_query):
+    query = f"site:vk.com {name_query}"
+    url = f"https://duckduckgo.com/html/?q={query}"
+    r = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(r.text, "lxml")
+    results = soup.find_all("a", href=True)
+    for link in results:
+        href = link["href"]
+        if "vk.com" in href and "/public" not in href and "/club" not in href:
+            DATA.append({"source": "VK", "name": name_query, "email": "", "phone": "", "link": href})
+
+def scrape_avito(search_term):
+    url = f"https://www.avito.ru/rossiya?q={search_term}"
+    r = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(r.text, "lxml")
     items = soup.find_all("a", href=True)
     for item in items:
         href = item["href"]
         if "/item/" in href:
             full_url = "https://www.avito.ru" + href
             ad = requests.get(full_url, headers=HEADERS)
-            ad_soup = BeautifulSoup(ad.text, "html.parser")
+            ad_soup = BeautifulSoup(ad.text, "lxml")
             text = ad_soup.get_text()
             phones = re.findall(r'\+?\d[\d\s\-\(\)]{8,}\d', text)
             title = ad_soup.find("span", {"itemprop": "name"})
@@ -147,14 +235,13 @@ def main_menu():
 │ 3. Поиск в папке 3                           │
 │ 4. Поиск OSINT                                │
 │ 5. Выход                                     │
-└────────────────────────────────────────────────┘\033[0m""")
+└────────────────────────────────────────────────┘\033[0m")
     choice = input("\033[1;36mВведите номер действия: \033[0m")
     return choice
 
 def run_osint():
     query = input("\033[1;36mВведите имя или ключевое слово для OSINT-поиска: \033[0m")
     scrape_github(query)
-    scrape_telegram(query)
     scrape_vk(query)
     scrape_avito(query)
     df = pd.DataFrame(DATA)
@@ -164,12 +251,8 @@ def run_osint():
     print("\033[1;32m\nСохранено в results.csv\033[0m")
 
 if __name__ == "__main__":
-    print("\033[1;32mСкрипт запущен...\033[0m")
     time.sleep(1)
     repo_url = input("\033[1;36mВведите URL репозитория: \033[0m")
-    if not repo_url.strip():
-        print("\033[1;31mВы не ввели URL. Завершение работы.\033[0m")
-        exit()
     local_repo_path = "repo_clone"
     clone_or_update_repo(repo_url, local_repo_path)
     while True:
