@@ -4,6 +4,7 @@ import time
 import itertools
 import threading
 import requests
+import urllib.parse
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
@@ -138,7 +139,7 @@ def main_menu():
 │ 3. Поиск в папке 3                           │
 │ 4. Поиск OSINT                                │
 │ 5. Выход                                     │
-└────────────────────────────────────────────────┘\033[0m")
+└────────────────────────────────────────────────┘\033[0m""")
     choice = input("\033[1;36mВведите номер действия: \033[0m")
     return choice
 
