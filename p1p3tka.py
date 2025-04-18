@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import re
 import pandas as pd
 from telethon.sync import TelegramClient
-from telethon.tl.functions.users import GetFullUser
+from telethon.tl.functions.users import GetFullUserRequest
 from telethon.errors import UsernameNotOccupiedError, FloodWaitError
 from telethon.tl.types import UserStatusOnline, UserStatusOffline
 
