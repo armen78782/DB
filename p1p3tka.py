@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 import os
 
 # ===== КОНФИГУРАЦИЯ =====
-REPO_URL = "https://github.com/armen78782/ВАШ_РЕПОЗИТОРИЙ/"
+REPO_URL = "https://github.com/armen78782/DB/"
 FOLDERS = {
     '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
     '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
