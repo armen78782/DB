@@ -1,6 +1,7 @@
 import os
 from termcolor import colored
 import sys
+import shutil
 
 def search_in_files(directory, keyword):
     hits = 0
