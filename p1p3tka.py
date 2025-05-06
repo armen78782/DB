@@ -5,8 +5,8 @@ from urllib.parse import urljoin
 # ===== КОНФИГУРАЦИЯ ===== (редактируйте эти значения!)
 REPO_URL = "https://github.com/armen78782/ВАШ_РЕПОЗИТОРИЙ/"
 FOLDERS = {
-    '1': {'name': 'OSINT - ПОИСК', 'path': 'sberbank'},
-    '2': {'name': 'БАЗА SBERBANK', 'path': 'src'},
+    '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
+    '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
 }
 
 def github_search(folder, keyword):
