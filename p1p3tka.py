@@ -1,14 +1,19 @@
 import requests
 from termcolor import colored
-from urllib.parse import urljoin
 import os
 
 # ===== КОНФИГУРАЦИЯ =====
 REPO_URL = "https://github.com/armen78782/DB/"
+REPO_OWNER = REPO_URL.split('/')[3]
+REPO_NAME = REPO_URL.split('/')[4]
+
 FOLDERS = {
     '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
     '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
+    '3': {'name': 'Поиск по Telegramm Username', 'path': teleg.py},  # Новый пункт
 }
+
+EXTERNAL_SCRIPT_PATH = "./teleg.py"  # путь к скрипту, который будет запускаться
 
 def banner():
     os.system("clear" if os.name != "nt" else "cls")
@@ -20,7 +25,7 @@ def banner():
 def github_search(folder, keyword):
     print(colored(f"\n[~] Сканирую папку {folder} в GitHub...\n", 'cyan'))
     try:
-        api_url = f"https://api.github.com/repos/{REPO_URL.split('/')[3]}/{REPO_URL.split('/')[4]}/contents/{folder}"
+        api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{folder}"
         response = requests.get(api_url)
 
         if response.status_code != 200:
@@ -52,11 +57,15 @@ def show_menu():
     print(colored("=" * 45, 'red'))
     return input(colored(">>> ВЫБЕРИТЕ ПАПКУ: ", 'cyan'))
 
-def main():
-    global REPO_URL
-    banner()
-    REPO_URL = input(colored(">>> Введите URL репозитория: ", 'cyan'))
+def run_external_script():
+    if os.path.isfile(EXTERNAL_SCRIPT_PATH):
+        print(colored(f"\n[*] Запуск {EXTERNAL_SCRIPT_PATH}...\n", 'green'))
+        os.system(f"python3 {EXTERNAL_SCRIPT_PATH}")
+    else:
+        print(colored(f"[X] Скрипт не найден по пути: {EXTERNAL_SCRIPT_PATH}", 'red'))
 
+def main():
+    banner()
     while True:
         choice = show_menu()
 
@@ -66,6 +75,12 @@ def main():
 
         if choice not in FOLDERS:
             print(colored("[X] Неверный выбор!", 'red'))
+            continue
+
+        if choice == '3':
+            run_external_script()
+            input(colored("\nНажмите Enter для продолжения...", 'magenta'))
+            banner()
             continue
 
         folder = FOLDERS[choice]
