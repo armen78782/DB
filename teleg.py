@@ -3,8 +3,8 @@ from datetime import datetime
 from telethon import TelegramClient, functions, types
 from telethon.tl.types import User, InputPrivacyKeyPhoneNumber, InputPrivacyValueDisallowAll
 
-api_id = 'ВАШ_API_ID'  # Получить на my.telegram.org
-api_hash = 'ВАШ_API_HASH'
+api_id = '23319571'  # Получить на my.telegram.org
+api_hash = 'e9cade797f8a9b29432cc955438057a2'
 client = TelegramClient('session_name', api_id, api_hash)
 
 async def main():
