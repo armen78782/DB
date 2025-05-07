@@ -10,10 +10,8 @@ REPO_NAME = REPO_URL.split('/')[4]
 FOLDERS = {
     '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
     '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
-    '3': {'name': 'Поиск по Telegramm Username', 'path': teleg.py},  # Новый пункт
+    '3': {'name': 'Поиск по Telegramm Username', 'path': 'teleg.py'},  # Новый пункт
 }
-
-EXTERNAL_SCRIPT_PATH = "./teleg.py"  # путь к скрипту, который будет запускаться
 
 def banner():
     os.system("clear" if os.name != "nt" else "cls")
@@ -57,13 +55,6 @@ def show_menu():
     print(colored("=" * 45, 'red'))
     return input(colored(">>> ВЫБЕРИТЕ ПАПКУ: ", 'cyan'))
 
-def run_external_script():
-    if os.path.isfile(EXTERNAL_SCRIPT_PATH):
-        print(colored(f"\n[*] Запуск {EXTERNAL_SCRIPT_PATH}...\n", 'green'))
-        os.system(f"python3 {EXTERNAL_SCRIPT_PATH}")
-    else:
-        print(colored(f"[X] Скрипт не найден по пути: {EXTERNAL_SCRIPT_PATH}", 'red'))
-
 def main():
     banner()
     while True:
@@ -78,7 +69,12 @@ def main():
             continue
 
         if choice == '3':
-            run_external_script()
+            script_path = FOLDERS[choice]['path']
+            if os.path.isfile(script_path):
+                print(colored(f"\n[*] Запуск {script_path}...\n", 'green'))
+                os.system(f"python3 {script_path}")
+            else:
+                print(colored(f"[X] Скрипт не найден: {script_path}", 'red'))
             input(colored("\nНажмите Enter для продолжения...", 'magenta'))
             banner()
             continue
