@@ -10,10 +10,14 @@ client = TelegramClient('session_name', api_id, api_hash)
 async def main():
     target = input("[🌑] Введите username/id цели: ")
     user = await client.get_entity(target)
-    
+
     if not isinstance(user, User):
         print("[💀] Цель не является пользователем!")
         return
+
+    # Получение полной информации
+    full = await client(functions.users.GetFullUserRequest(user.id))
+    about = full.full_user.about or "—"
 
     # Основная информация
     print(f"\n[🔮] ОСНОВНЫЕ ДАННЫЕ:")
@@ -21,12 +25,12 @@ async def main():
     print(f"Username: @{user.username}")
     print(f"Имя: {user.first_name}")
     print(f"Фамилия: {user.last_name}")
-    print(f"Био: {user.about}")
+    print(f"Био: {about}")
     print(f"Премиум: {user.premium}")
     print(f"Бот: {user.bot}")
     print(f"Фейк: {user.fake}")
     print(f"Скам: {user.scam}")
-    print(f"Последний онлайн: {user.status.was_online}")
+    print(f"Последний онлайн: {getattr(user.status, 'was_online', 'скрыт')}")
 
     # Анализ активности
     print(f"\n[📈] АКТИВНОСТЬ:")
@@ -56,7 +60,7 @@ async def main():
 
     # Защита приватности (ваша)
     await client(functions.account.UpdatePrivacyRequest(
-        key=InputPrivacyKeyPhoneNumber,
+        key=InputPrivacyKeyPhoneNumber(),
         rules=[InputPrivacyValueDisallowAll()]
     ))
 
