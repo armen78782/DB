@@ -41,6 +41,10 @@ def github_search(folder, keyword):
                         print(colored(f"\n[+] Файл: {item['path']}", 'green'))
                         print(colored(f" -> Строка {line_num}: {line.strip()}", 'yellow'))
                         hits += 1
+                        file_hits += 1
+
+        if file_hits == 0:
+    print(colored(f"\n[-] Нет совпадений в файле: {item['path']}", 'red'))
         return hits
 
     except Exception as e:
