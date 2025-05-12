@@ -10,7 +10,7 @@ REPO_NAME = REPO_URL.split('/')[4]
 FOLDERS = {
     '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
     '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
-    '3': {'name': 'Поиск по Telegramm Username', 'path': 'teleg.py'},  # Новый пункт
+    '3': {'name': 'Поиск по IP', 'path': 'teleg.py'},  # Новый пункт
 }
 
 def banner():
