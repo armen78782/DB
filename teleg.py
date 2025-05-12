@@ -1,68 +1,132 @@
-import os
+import requests
+import re
+import dns.resolver
+import argparse
 from datetime import datetime
-from telethon import TelegramClient, functions, types
-from telethon.tl.types import User, InputPrivacyKeyPhoneNumber, InputPrivacyValueDisallowAll
 
-api_id = '23319571'  # Получить на my.telegram.org
-api_hash = 'e9cade797f8a9b29432cc955438057a2'
-client = TelegramClient('session_name', api_id, api_hash)
+# Конфигурация API (замените ключи при необходимости)
+API_KEYS = {
+    'abuseipdb': 'ваш_ключ',
+    'virustotal': 'ваш_ключ'
+}
 
-async def main():
-    target = input("[🌑] Введите username/id цели: ")
-    user = await client.get_entity(target)
+def validate_ip(ip):
+    ipv4_pattern = r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+    ipv6_pattern = r'^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
+    return re.match(ipv4_pattern, ip) or re.match(ipv6_pattern, ip)
 
-    if not isinstance(user, User):
-        print("[💀] Цель не является пользователем!")
-        return
-
-    # Получение полной информации
-    full = await client(functions.users.GetFullUserRequest(user.id))
-    about = full.full_user.about or "—"
-
-    # Основная информация
-    print(f"\n[🔮] ОСНОВНЫЕ ДАННЫЕ:")
-    print(f"ID: {user.id}")
-    print(f"Username: @{user.username}")
-    print(f"Имя: {user.first_name}")
-    print(f"Фамилия: {user.last_name}")
-    print(f"Био: {about}")
-    print(f"Премиум: {user.premium}")
-    print(f"Бот: {user.bot}")
-    print(f"Фейк: {user.fake}")
-    print(f"Скам: {user.scam}")
-    print(f"Последний онлайн: {getattr(user.status, 'was_online', 'скрыт')}")
-
-    # Анализ активности
-    print(f"\n[📈] АКТИВНОСТЬ:")
+def get_geo_info(ip):
     try:
-        async for msg in client.iter_messages(user, limit=5):
-            print(f"{msg.date.strftime('%Y-%m-%d %H:%M')}: {msg.text[:50]}...")
-    except Exception as e:
-        print(f"Не удалось получить сообщения: {str(e)}")
-
-    # Социальный граф
-    print(f"\n[🕸️] СОЦИАЛЬНЫЕ СВЯЗИ:")
-    common_chats = await client.get_common_chats(user.id)
-    print(f"Общие чаты ({len(common_chats)}):")
-    for chat in common_chats[:3]:
-        print(f"- {chat.title} (ID: {chat.id})")
-
-    # Скачивание медиа
-    print(f"\n[📷] МЕДИА:")
-    media_path = f"/sdcard/Telegram_Data/{user.id}"
-    os.makedirs(media_path, exist_ok=True)
-    try:
-        async for msg in client.iter_messages(user, limit=3, filter=types.InputMessagesFilterPhotoVideo):
-            await client.download_media(msg, media_path)
-            print(f"Скачано: {msg.id}")
+        response = requests.get(f"http://ip-api.com/json/{ip}?fields=66846719")
+        return response.json() if response.json()['status'] == 'success' else None
     except:
-        print("Нет доступа к медиа")
+        return None
 
-    # Защита приватности (ваша)
-    await client(functions.account.UpdatePrivacyRequest(
-        key=InputPrivacyKeyPhoneNumber(),
-        rules=[InputPrivacyValueDisallowAll()]
-    ))
+def get_whois_info(ip):
+    try:
+        response = requests.get(f"http://ipwhois.app/json/{ip}")
+        return response.json()
+    except:
+        return None
 
-with client:
-    client.loop.run_until_complete(main())
+def get_threat_info(ip):
+    try:
+        headers = {'Key': API_KEYS['abuseipdb']}
+        response = requests.get(
+            f"https://api.abuseipdb.com/api/v2/check",
+            headers=headers,
+            params={'ipAddress': ip, 'maxAgeInDays': 90}
+        )
+        return response.json()['data'] if response.status_code == 200 else None
+    except:
+        return None
+
+def get_virustotal_info(ip):
+    try:
+        headers = {'x-apikey': API_KEYS['virustotal']}
+        response = requests.get(
+            f"https://www.virustotal.com/api/v3/ip_addresses/{ip}",
+            headers=headers
+        )
+        return response.json() if response.status_code == 200 else None
+    except:
+        return None
+
+def get_dns_records(domain):
+    try:
+        result = {}
+        for qtype in ['A', 'AAAA', 'MX', 'TXT', 'NS']:
+            answers = dns.resolver.resolve(domain, qtype, raise_on_no_answer=False)
+            result[qtype] = [str(r) for r in answers]
+        return result
+    except:
+        return None
+
+def print_full_report(ip):
+    print("\n\033[1;36m" + "="*40)
+    print(f"Полный отчет для {ip}")
+    print("="*40 + "\033[0m")
+
+    # Гео-информация
+    if geo := get_geo_info(ip):
+        print("\n\033[1;34m[Геолокация]\033[0m")
+        print(f"Страна: {geo.get('country', 'N/A')}")
+        print(f"Город: {geo.get('city', 'N/A')}")
+        print(f"Координаты: {geo.get('lat', 'N/A')}, {geo.get('lon', 'N/A')}")
+        print(f"Провайдер: {geo.get('isp', 'N/A')}")
+
+    # Whois информация
+    if whois := get_whois_info(ip):
+        print("\n\033[1;34m[WHOIS]\033[0m")
+        print(f"Регистратор: {whois.get('isp', 'N/A')}")
+        print(f"ASN: {whois.get('asn', 'N/A')}")
+        print(f"Диапазон: {whois.get('range', 'N/A')}")
+
+    # Информация об угрозах
+    if threat := get_threat_info(ip):
+        print("\n\033[1;34m[Угрозы]\033[0m")
+        print(f"Уровень угрозы: {threat.get('abuseConfidenceScore', 0)}%")
+        print(f"Последний отчет: {threat.get('lastReportedAt', 'N/A')}")
+        print(f"Всего отчетов: {threat.get('totalReports', 0)}")
+
+    # VirusTotal информация
+    if vt := get_virustotal_info(ip):
+        print("\n\033[1;34m[VirusTotal]\033[0m")
+        stats = vt.get('data', {}).get('attributes', {}).get('last_analysis_stats', {})
+        print(f"Вредоносные: {stats.get('malicious', 0)}")
+        print(f"Подозрительные: {stats.get('suspicious', 0)}")
+
+def main_menu():
+    while True:
+        print("\n\033[1;36m=== Главное меню ===")
+        print("1. Проверить IP-адрес")
+        print("2. Проверить домен")
+        print("3. Выход\033[0m")
+
+        choice = input("\nВыберите действие: ").strip()
+
+        if choice == '1':
+            ip = input("Введите IP-адрес: ").strip()
+            if validate_ip(ip):
+                print_full_report(ip)
+            else:
+                print("\033[1;31mНеверный формат IP!\033[0m")
+
+        elif choice == '2':
+            domain = input("Введите домен: ").strip()
+            if records := get_dns_records(domain):
+                print("\n\033[1;34m[DNS Записи]\033[0m")
+                for qtype, values in records.items():
+                    print(f"{qtype}: {', '.join(values) if values else 'N/A'}")
+            else:
+                print("\033[1;31mОшибка получения DNS записей!\033[0m")
+
+        elif choice == '3':
+            print("\nВыход...")
+            break
+
+        else:
+            print("\033[1;31mНеверный выбор!\033[0m")
+
+if __name__ == "__main__":
+    main_menu()
