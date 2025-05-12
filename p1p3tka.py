@@ -11,6 +11,7 @@ FOLDERS = {
     '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
     '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
     '3': {'name': 'Поиск по IP', 'path': 'teleg.py'},  # Новый пункт
+    '4': {'name': 'Поиск по Утечкам', 'path': 'utechk.py'},  # Новый пункт для скрипта
 }
 
 def banner():
@@ -73,7 +74,20 @@ def main():
             print(colored("[X] Неверный выбор!", 'red'))
             continue
 
+        # Обработка выбора для запуска Python-скрипта
         if choice == '3':
+            script_path = FOLDERS[choice]['path']
+            if os.path.isfile(script_path):
+                print(colored(f"\n[*] Запуск {script_path}...\n", 'green'))
+                os.system(f"python3 {script_path}")
+            else:
+                print(colored(f"[X] Скрипт не найден: {script_path}", 'red'))
+            input(colored("\nНажмите Enter для продолжения...", 'magenta'))
+            banner()
+            continue
+
+        # Обработка нового пункта для запуска скрипта
+        if choice == '4':
             script_path = FOLDERS[choice]['path']
             if os.path.isfile(script_path):
                 print(colored(f"\n[*] Запуск {script_path}...\n", 'green'))
