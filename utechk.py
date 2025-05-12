@@ -1,8 +1,8 @@
 import requests
 
 LEAKCHECK_API = "cd7838a05a1cf8a1354b20e31098bfa08ae1bfa7"
-DEHASHED_USER = "email@domain.com"
-DEHASHED_PASS = "your_password"
+DEHASHED_USER = "ayvazyanmeliq0@gmail.com"
+DEHASHED_PASS = "Ayvazyan12345"
 
 def check_leakcheck(query):
     try:
