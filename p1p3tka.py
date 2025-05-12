@@ -36,6 +36,8 @@ def github_search(folder, keyword):
                 file_url = item['download_url']
                 file_content = requests.get(file_url).text
 
+                file_hits = 0  # инициализация перед анализом файла
+
                 for line_num, line in enumerate(file_content.split('\n'), 1):
                     if keyword.lower() in line.lower():
                         print(colored(f"\n[+] Файл: {item['path']}", 'green'))
@@ -43,9 +45,8 @@ def github_search(folder, keyword):
                         hits += 1
                         file_hits += 1
 
-        if file_hits == 0:
-    print(colored(f"\n[-] Нет совпадений в файле: {item['path']}", 'red'))
-        return hits
+                if file_hits == 0:
+                    print(colored(f"\n[-] Нет совпадений в файле: {item['path']}", 'red'))
 
     except Exception as e:
         print(colored(f"[X] Критическая ошибка: {str(e)}", 'red'))
