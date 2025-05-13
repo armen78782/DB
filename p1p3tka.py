@@ -58,7 +58,7 @@ def read_xlsx_file(file_content, keyword):
     return hits
 
 def github_search(folder, keyword):
-    print(colored(f"\n[~] Сканирую папку {folder} в GitHub...\n", 'cyan'))
+    print(colored(f"\n[~] Сканирую папку {folder}...\n", 'cyan'))
     try:
         api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{folder}"
         response = requests.get(api_url)
