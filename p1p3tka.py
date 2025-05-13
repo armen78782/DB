@@ -1,6 +1,9 @@
 import requests
 from termcolor import colored
 import os
+import csv
+from openpyxl import load_workbook
+import io
 
 # ===== КОНФИГУРАЦИЯ =====
 REPO_URL = "https://github.com/armen78782/DB/"
@@ -21,6 +24,39 @@ def banner():
     print(colored("        HARROOIN_SOFT", 'cyan', attrs=['bold']))
     print(colored("             by HAARROOIN\n", 'white', attrs=['bold']))
 
+def read_txt_file(file_content, keyword):
+    hits = 0
+    for line_num, line in enumerate(file_content.split('\n'), 1):
+        if keyword.lower() in line.lower():
+            print(colored(f"\n[HARROOIN SOFT]", 'green', attrs=['bold']))
+            print(colored(f"[•] Строка {line_num}: ", 'yellow') + colored(line.strip(), 'white', attrs=['bold', 'underline']))
+            hits += 1
+    return hits
+
+def read_csv_file(file_content, keyword):
+    hits = 0
+    csv_reader = csv.reader(io.StringIO(file_content))
+    for line_num, row in enumerate(csv_reader, 1):
+        for cell in row:
+            if keyword.lower() in cell.lower():
+                print(colored(f"\n[HARROOIN SOFT]", 'green', attrs=['bold']))
+                print(colored(f"[+] Строка {line_num}: ", 'yellow') + colored(cell.strip(), 'white', attrs=['bold', 'underline']))
+                hits += 1
+    return hits
+
+def read_xlsx_file(file_content, keyword):
+    hits = 0
+    workbook = load_workbook(filename=io.BytesIO(file_content))
+    for sheet in workbook.sheetnames:
+        worksheet = workbook[sheet]
+        for row in worksheet.iter_rows(values_only=True):
+            for cell in row:
+                if cell and keyword.lower() in str(cell).lower():
+                    print(colored(f"\n[HARROOIN SOFT] Найдено совпадение в листе '{sheet}'!", 'green', attrs=['bold']))
+                    print(colored(f"[+] Значение: ", 'yellow') + colored(str(cell).strip(), 'white', attrs=['bold', 'underline']))
+                    hits += 1
+    return hits
+
 def github_search(folder, keyword):
     print(colored(f"\n[~] Сканирую папку {folder} в GitHub...\n", 'cyan'))
     try:
@@ -33,21 +69,19 @@ def github_search(folder, keyword):
 
         hits = 0
         for item in response.json():
+            file_url = item['download_url']
             if item['name'].endswith('.txt'):
-                file_url = item['download_url']
                 file_content = requests.get(file_url).text
+                hits += read_txt_file(file_content, keyword)
+            elif item['name'].endswith('.csv'):
+                file_content = requests.get(file_url).text
+                hits += read_csv_file(file_content, keyword)
+            elif item['name'].endswith('.xlsx'):
+                file_content = requests.get(file_url).content
+                hits += read_xlsx_file(file_content, keyword)
 
-                file_hits = 0  # инициализация перед анализом файла
-
-                for line_num, line in enumerate(file_content.split('\n'), 1):
-                    if keyword.lower() in line.lower():
-                        print(colored(f"\n[+] Файл: {item['path']}", 'green'))
-                        print(colored(f" -> Строка {line_num}: {line.strip()}", 'yellow'))
-                        hits += 1
-                        file_hits += 1
-
-                if file_hits == 0:
-                    print(colored(f"\n[-] Нет совпадений в файле: {item['path']}", 'red'))
+        if hits == 0:
+            print(colored("\n[-] Нет совпадений в файлах.", 'red'))
 
     except Exception as e:
         print(colored(f"[X] Критическая ошибка: {str(e)}", 'red'))
@@ -75,19 +109,7 @@ def main():
             continue
 
         # Обработка выбора для запуска Python-скрипта
-        if choice == '3':
-            script_path = FOLDERS[choice]['path']
-            if os.path.isfile(script_path):
-                print(colored(f"\n[*] Запуск {script_path}...\n", 'green'))
-                os.system(f"python3 {script_path}")
-            else:
-                print(colored(f"[X] Скрипт не найден: {script_path}", 'red'))
-            input(colored("\nНажмите Enter для продолжения...", 'magenta'))
-            banner()
-            continue
-
-        # Обработка нового пункта для запуска скрипта
-        if choice == '4':
+        if choice in ['3', '4']:
             script_path = FOLDERS[choice]['path']
             if os.path.isfile(script_path):
                 print(colored(f"\n[*] Запуск {script_path}...\n", 'green'))
