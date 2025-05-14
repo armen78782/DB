@@ -2,11 +2,11 @@
 
 clear
 
-# Показываем лицо Эллиота как ASCII из .jpg
-jp2a --width=70 elliot.jpg
+# Открываем JPG-файл во внешней галерее
+am start -a android.intent.action.VIEW -d file:///data/data/com.termux/files/home/your-project/elliot.jpg -t image/jpeg
 
-# Пауза
+# Небольшая пауза, чтобы пользователь успел увидеть картинку
 sleep 2
 
-# Запуск Python-софта
-python main.py
+# Запуск Python-программы
+python p1p3tka.py
