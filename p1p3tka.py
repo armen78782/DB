@@ -1,152 +1,131 @@
 import requests
+from termcolor import colored
+import os
 import csv
 from openpyxl import load_workbook
 import io
 
-from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.spinner import Spinner
-from kivy.uix.label import Label
-from kivy.uix.image import Image
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.boxlayout import BoxLayout
-
+# ===== КОНФИГУРАЦИЯ =====
 REPO_URL = "https://github.com/armen78782/DB/"
 REPO_OWNER = REPO_URL.split('/')[3]
 REPO_NAME = REPO_URL.split('/')[4]
 
 FOLDERS = {
-    'OSINT - ПОИСК': 'probiv',
-    'БАЗА SBERBANK': 'sberbank',
+    '1': {'name': 'OSINT - ПОИСК', 'path': 'probiv'},
+    '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
+    '3': {'name': 'Поиск по IP', 'path': 'teleg.py'},  # Новый пункт
+    '4': {'name': 'Поиск по Утечкам', 'path': 'utechk.py'},  # Новый пункт для скрипта
 }
 
-class OSINTApp(App):
-    def build(self):
-        self.layout = FloatLayout()
-        self.folder_choice = list(FOLDERS.keys())[0]
+def banner():
+    os.system("clear" if os.name != "nt" else "cls")
+    print()
+    print(colored("========[ HAARROOIN ]========", 'red', attrs=['bold', 'underline']))
+    print(colored("        HARROOIN_SOFT", 'cyan', attrs=['bold']))
+    print(colored("             by HAARROOIN\n", 'white', attrs=['bold']))
 
-        # Фон
-        self.bg = Image(source='elliot.jpg', allow_stretch=True, keep_ratio=False)
-        self.layout.add_widget(self.bg)
+def read_txt_file(file_content, keyword):
+    hits = 0
+    for line_num, line in enumerate(file_content.split('\n'), 1):
+        if keyword.lower() in line.lower():
+            print(colored(f"\n[HARROOIN SOFT]", 'green', attrs=['bold']))
+            print(colored(f"[•] Строка {line_num}: ", 'yellow') + colored(line.strip(), 'white', attrs=['bold', 'underline']))
+            hits += 1
+    return hits
 
-        # Выпадающий список
-        self.spinner = Spinner(
-            text=self.folder_choice,
-            values=list(FOLDERS.keys()),
-            size_hint=(0.6, 0.1),
-            pos_hint={'center_x': 0.5, 'top': 0.95}
-        )
-        self.spinner.bind(text=self.set_folder)
-        self.layout.add_widget(self.spinner)
-
-        # Поле ввода
-        self.input = TextInput(
-            hint_text='Введите слово для поиска и нажмите Enter',
-            size_hint=(0.8, 0.1),
-            pos_hint={'center_x': 0.5, 'top': 0.8},
-            multiline=False
-        )
-        self.input.bind(on_text_validate=self.on_enter)
-        self.layout.add_widget(self.input)
-
-        # Вывод результата (прокручиваемый)
-        self.result_label = Label(
-            text='',
-            markup=True,
-            valign='top',
-            size_hint_y=None
-        )
-        self.result_label.bind(texture_size=self.update_label_height)
-
-        self.scroll = ScrollView(
-            size_hint=(0.9, 0.5),
-            pos_hint={'center_x': 0.5, 'y': 0.05}
-        )
-        box = BoxLayout(orientation='vertical', size_hint_y=None)
-        box.add_widget(self.result_label)
-        self.scroll.add_widget(box)
-        self.layout.add_widget(self.scroll)
-
-        return self.layout
-
-    def set_folder(self, spinner, text):
-        self.folder_choice = text
-
-    def on_enter(self, instance):
-        keyword = self.input.text.strip()
-        folder_path = FOLDERS[self.folder_choice]
-        self.result_label.text = "[color=00ffff]Поиск...[/color]"
-        self.input.text = ''
-        self.result_label.text = self.github_search(folder_path, keyword)
-
-    def update_label_height(self, instance, value):
-        self.result_label.height = self.result_label.texture_size[1]
-        self.result_label.text_size = (self.scroll.width * 0.95, None)
-
-    def github_search(self, folder, keyword):
-        output = f"[b]Ищем в папке: {folder}[/b]\n"
-        try:
-            api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{folder}"
-            response = requests.get(api_url)
-
-            if response.status_code != 200:
-                return f"[color=ff0000]Ошибка доступа: {response.status_code}[/color]"
-
-            hits = 0
-            for item in response.json():
-                file_url = item['download_url']
-                name = item['name']
-                if name.endswith('.txt'):
-                    content = requests.get(file_url).text
-                    hits += self.search_txt(content, keyword, output)
-                elif name.endswith('.csv'):
-                    content = requests.get(file_url).text
-                    hits += self.search_csv(content, keyword, output)
-                elif name.endswith('.xlsx'):
-                    content = requests.get(file_url).content
-                    hits += self.search_xlsx(content, keyword, output)
-
-            if hits == 0:
-                return f"[color=ff0000]Совпадений не найдено.[/color]"
-            return self.result_label.text
-        except Exception as e:
-            return f"[color=ff0000]Ошибка: {str(e)}[/color]"
-
-    def search_txt(self, content, keyword, output):
-        hits = 0
-        result = ""
-        for i, line in enumerate(content.splitlines(), 1):
-            if keyword.lower() in line.lower():
-                result += f"[color=00ff00][{i}][/color] {line}\n"
+def read_csv_file(file_content, keyword):
+    hits = 0
+    csv_reader = csv.reader(io.StringIO(file_content))
+    for line_num, row in enumerate(csv_reader, 1):
+        for cell in row:
+            if keyword.lower() in cell.lower():
+                print(colored(f"\n[HARROOIN SOFT]", 'green', attrs=['bold']))
+                print(colored(f"[+] Строка {line_num}: ", 'yellow') + colored(cell.strip(), 'white', attrs=['bold', 'underline']))
                 hits += 1
-        self.result_label.text += result
-        return hits
+    return hits
 
-    def search_csv(self, content, keyword, output):
-        hits = 0
-        result = ""
-        csv_reader = csv.reader(io.StringIO(content))
-        for i, row in enumerate(csv_reader, 1):
+def read_xlsx_file(file_content, keyword):
+    hits = 0
+    workbook = load_workbook(filename=io.BytesIO(file_content))
+    for sheet in workbook.sheetnames:
+        worksheet = workbook[sheet]
+        for row in worksheet.iter_rows(values_only=True):
             for cell in row:
-                if keyword.lower() in cell.lower():
-                    result += f"[color=00ff00][{i}][/color] {cell}\n"
+                if cell and keyword.lower() in str(cell).lower():
+                    print(colored(f"\n[HARROOIN SOFT] Найдено совпадение в листе '{sheet}'!", 'green', attrs=['bold']))
+                    print(colored(f"[+] Значение: ", 'yellow') + colored(str(cell).strip(), 'white', attrs=['bold', 'underline']))
                     hits += 1
-        self.result_label.text += result
-        return hits
+    return hits
 
-    def search_xlsx(self, content, keyword, output):
+def github_search(folder, keyword):
+    print(colored(f"\n[~] Сканирую папку {folder}...\n", 'cyan'))
+    try:
+        api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{folder}"
+        response = requests.get(api_url)
+
+        if response.status_code != 200:
+            print(colored(f"[!] Ошибка доступа: {response.status_code}", 'red'))
+            return 0
+
         hits = 0
-        result = ""
-        workbook = load_workbook(filename=io.BytesIO(content))
-        for sheet in workbook:
-            for row in sheet.iter_rows(values_only=True):
-                for cell in row:
-                    if cell and keyword.lower() in str(cell).lower():
-                        result += f"[color=00ff00][{sheet.title}][/color] {str(cell)}\n"
-                        hits += 1
-        self.result_label.text += result
-        return hits
+        for item in response.json():
+            file_url = item['download_url']
+            if item['name'].endswith('.txt'):
+                file_content = requests.get(file_url).text
+                hits += read_txt_file(file_content, keyword)
+            elif item['name'].endswith('.csv'):
+                file_content = requests.get(file_url).text
+                hits += read_csv_file(file_content, keyword)
+            elif item['name'].endswith('.xlsx'):
+                file_content = requests.get(file_url).content
+                hits += read_xlsx_file(file_content, keyword)
 
-if __name__ == '__main__':
-    OSINTApp().run()
+        if hits == 0:
+            print(colored("\n[-] Нет совпадений в файлах.", 'red'))
+
+    except Exception as e:
+        print(colored(f"[X] Критическая ошибка: {str(e)}", 'red'))
+        return 0
+
+def show_menu():
+    print(colored("=" * 45, 'red'))
+    for num, folder in FOLDERS.items():
+        print(colored(f"[{num}] {folder['name']}", 'white'))
+    print(colored("[0] ВЫХОД", 'white'))
+    print(colored("=" * 45, 'red'))
+    return input(colored(">>> ВЫБЕРИТЕ ПАПКУ: ", 'cyan'))
+
+def main():
+    banner()
+    while True:
+        choice = show_menu()
+
+        if choice == '0':
+            print(colored("\n[!] Выход...\n", 'red'))
+            break
+
+        if choice not in FOLDERS:
+            print(colored("[X] Неверный выбор!", 'red'))
+            continue
+
+        # Обработка выбора для запуска Python-скрипта
+        if choice in ['3', '4']:
+            script_path = FOLDERS[choice]['path']
+            if os.path.isfile(script_path):
+                print(colored(f"\n[*] Запуск {script_path}...\n", 'green'))
+                os.system(f"python3 {script_path}")
+            else:
+                print(colored(f"[X] Скрипт не найден: {script_path}", 'red'))
+            input(colored("\nНажмите Enter для продолжения...", 'magenta'))
+            banner()
+            continue
+
+        folder = FOLDERS[choice]
+        keyword = input(colored(">>> Введите слово для поиска: ", 'cyan'))
+        hits = github_search(folder['path'], keyword)
+        print(colored(f"\n[*] Найдено совпадений: {hits}", 'green'))
+        input(colored("\nНажмите Enter для продолжения...", 'magenta'))
+        banner()
+
+if __name__ == "__main__":
+    main()
