@@ -15,6 +15,7 @@ FOLDERS = {
     '2': {'name': 'БАЗА SBERBANK', 'path': 'sberbank'},
     '3': {'name': 'Поиск по IP', 'path': 'teleg.py'},  # Новый пункт
     '4': {'name': 'Поиск по Утечкам', 'path': 'utechk.py'},  # Новый пункт для скрипта
+    '5': {'name': 'Поиск По Армении', 'path': 'armenia'}, 
 }
 
 def banner():
