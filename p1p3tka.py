@@ -54,8 +54,9 @@ def read_xlsx_file(file_content, keyword):
             for cell in row:
                 if cell and keyword.lower() in str(cell).lower():
                     print(colored(f"\n[HARROOIN SOFT] Найдено совпадение в листе '{sheet}'!", 'green', attrs=['bold']))
-                    print(colored(f"[+] Значение: ", 'yellow') + colored(str(cell).strip(), 'white', attrs=['bold', 'underline']))
+                    print(colored("[+] Вся строка: ", 'yellow') + colored(str(row), 'white', attrs=['bold']))
                     hits += 1
+                    break  # прекращаем проверку оставшихся ячеек в строке
     return hits
 
 def github_search(folder, keyword):
